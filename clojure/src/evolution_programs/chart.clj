@@ -1,8 +1,10 @@
 (ns evolution-programs.chart
   (:require [evolution-programs.population-statistic :as stat])
-  (:import [org.jfree.chart ChartFactory ChartPanel]
+  (:import [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
            [org.jfree.data.category DefaultCategoryDataset]
            [org.jfree.ui ApplicationFrame]))
+
+(ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
 
 (defn- chart [dataset]
   (doto (ChartFactory/createLineChart "Population Analysis" "Generation" "Fitness" dataset)
