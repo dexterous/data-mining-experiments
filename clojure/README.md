@@ -12,6 +12,11 @@ Right now, each experiment is in its own namespace and has it own `-main` method
 
     $ lein run -m evolution-programs.$EXPERIMENT
 
+While the logging functions can be passed to evolution-programs.core/run, the default behaviour it to log to the console
+as well as plot the chart. For the sake of convenience, the combined logger flushes console output after logging each
+generation as well as pauses between plotting the statistics for the same so that we can observe the progression of the
+populations.
+
 ## Examples
 
     $ lein run -m evolution-programs.one-param
@@ -37,3 +42,5 @@ Right now, each experiment is in its own namespace and has it own `-main` method
     Generation:  19 | Mean fitness 2.434751 | Best: 2.434751 
     Generation:  20 | Mean fitness 2.434751 | Best: 2.434751 
     {:solution (1.4460229916273573), :feasible true, :fitness 2.4347512006287895, :objective Maximize, :generation 20}
+
+[PENDING: screenshot]
