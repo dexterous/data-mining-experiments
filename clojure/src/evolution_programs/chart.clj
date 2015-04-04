@@ -25,7 +25,8 @@
 
 (defn log-generation [dataset population generation]
   (.addValue dataset (stat/mean-fitness population) "Mean" generation)
-  (.addValue dataset (stat/best-fitness population) "Best" generation))
+  (.addValue dataset (stat/best-fitness population) "Best" generation)
+  (Thread/sleep 200))
 
 (defn logger []
   (let [dataset (DefaultCategoryDataset.)]

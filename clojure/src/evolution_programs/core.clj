@@ -11,9 +11,7 @@
 
 (defn- spread-logger [& loggers]
   (fn [p g]
-    (doseq [l loggers] (l p g))
-    (flush)
-    (Thread/sleep 250)))
+    (doseq [l loggers] (l p g))))
 
 (defn run
   ([objective limits]
