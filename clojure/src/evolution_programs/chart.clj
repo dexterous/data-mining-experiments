@@ -1,12 +1,20 @@
 (ns evolution-programs.chart
   (:require [evolution-programs.population-statistic :as stat])
   (:import [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
-           [org.jfree.data.category DefaultCategoryDataset]
+           [org.jfree.data.category CategoryDataset DefaultCategoryDataset]
+           [org.jfree.data.function Function2D]
+           [org.jfree.data.general DatasetUtilities]
+           [org.jfree.data.xy XYDataset]
            [org.jfree.ui ApplicationFrame]))
 
 (ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
 
-(defn- chart [dataset]
+(defmulti ^:private chart class)
+
+(defmethod chart XYDataset [dataset]
+  (ChartFactory/createXYLineChart "Curve of function" "X" "Y" dataset))
+
+(defmethod chart CategoryDataset [dataset]
   (doto (ChartFactory/createLineChart "Population Analysis" "Generation" "Fitness" dataset)
     (->
       (.getCategoryPlot)
@@ -17,8 +25,8 @@
   (doto (ChartPanel. chart)
     (.setMouseWheelEnabled true)))
 
-(defn- frame [dataset]
-  (doto (ApplicationFrame. "Population Analysis")
+(defn frame [title dataset]
+  (doto (ApplicationFrame. title)
     (.setContentPane (panel (chart dataset)))
     (.pack)
     (.setVisible true)))
@@ -30,5 +38,10 @@
 
 (defn logger []
   (let [dataset (DefaultCategoryDataset.)]
-    (frame dataset)
+    (frame  "Population Analysis" dataset)
     (partial log-generation dataset)))
+
+(defn sample [f min max]
+  (DatasetUtilities/sampleFunction2D
+    (reify Function2D (getValue [this x] (f x)))
+    min max 1000 "Value"))

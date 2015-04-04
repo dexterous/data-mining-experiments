@@ -1,5 +1,6 @@
 (ns evolution-programs.one-param
-  (:require [evolution-programs.core :as core])
+  (:require [evolution-programs.core :as core]
+            [evolution-programs.chart :as chart])
   (:gen-class))
 
 (defn f [x]
@@ -10,4 +11,5 @@
 (def limits [{:min -1 :max 2}])
 
 (defn -main [& args]
+  (chart/frame "Curve of function" (chart/sample f -1 2))
   (println (core/maximize f limits)))
