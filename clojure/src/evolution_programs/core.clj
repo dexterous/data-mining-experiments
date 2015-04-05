@@ -15,16 +15,25 @@
 
 (def max-generations 20)
 
+(defn preserving-fittest [f]
+  (fn [& args]
+    (let [population (last args)
+          fittest (apply max-key #(:fitness (meta %)) population)
+          new-pop (apply f args)]
+      (if (.contains new-pop fittest)
+        new-pop
+        (cons fittest (rest new-pop))))))
+
 (defn run
   ([objective limits]
    (run objective limits (spread-logger (console/logger) (chart/logger))))
   ([objective limits logger]
    (ga/run
      objective
-     selection/binary-tournament-without-replacement
-     (partial recombination/crossover
-              (partial crossover/simulated-binary-with-limits limits)
-              (partial mutation/parameter-based-with-limits limits max-generations))
+     (preserving-fittest selection/binary-tournament-without-replacement)
+     (preserving-fittest (partial recombination/crossover-mutation
+                                  (partial crossover/simulated-binary-with-limits limits)
+                                  (partial mutation/parameter-based-with-limits limits max-generations)))
      (ga/terminate-max-generations? max-generations)
      (random-generators/generate-population 20 limits)
      logger)))
