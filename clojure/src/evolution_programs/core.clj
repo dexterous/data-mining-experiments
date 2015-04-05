@@ -13,6 +13,8 @@
   (fn [p g]
     (doseq [l loggers] (l p g))))
 
+(def max-generations 20)
+
 (defn run
   ([objective limits]
    (run objective limits (spread-logger (console/logger) (chart/logger))))
@@ -21,8 +23,9 @@
      objective
      selection/binary-tournament-without-replacement
      (partial recombination/crossover
-              (partial crossover/simulated-binary-with-limits limits))
-     (ga/terminate-max-generations? 20)
+              (partial crossover/simulated-binary-with-limits limits)
+              (partial mutation/parameter-based-with-limits limits max-generations))
+     (ga/terminate-max-generations? max-generations)
      (random-generators/generate-population 20 limits)
      logger)))
 
