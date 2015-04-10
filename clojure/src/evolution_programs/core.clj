@@ -38,3 +38,4 @@
        logger))))
 
 (defn maximize [f & options] (apply run (cons (objective/maximize f) options)))
+(defn minimize [f & options] (apply run (cons (objective/minimize f) options)))
