@@ -12,5 +12,5 @@
 (def limits [{:min -3.0 :max 12.1} {:min 4.1 :max 5.8}])
 
 (defn -main [& args]
-  (println (core/maximize f limits)))
+  (core/maximize f limits))
 

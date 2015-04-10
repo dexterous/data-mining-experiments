@@ -12,4 +12,4 @@
 
 (defn -main [& args]
   (chart/frame "Curve of function" (chart/sample f -1 2))
-  (println (core/maximize f limits)))
+  (core/maximize f limits))
