@@ -13,7 +13,7 @@
   (fn [p g]
     (doseq [l loggers] (l p g))))
 
-(defn preserving-fittest [f]
+(defn- preserving-fittest [f]
   (fn [& args]
     (let [population (last args)
           fittest (apply max-key #(:fitness (meta %)) population)
