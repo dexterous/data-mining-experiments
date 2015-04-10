@@ -1,6 +1,6 @@
 (ns evolution-programs.chart
   (:require [evolution-programs.population-statistic :as stat])
-  (:import [javax.swing BoxLayout]
+  (:import [javax.swing BoxLayout JFrame]
            [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
            [org.jfree.data.category CategoryDataset DefaultCategoryDataset]
            [org.jfree.data.function Function2D]
@@ -30,6 +30,7 @@
 
 (defn- panel [chart]
   (doto (ChartPanel. chart)
+    (.setMaximumDrawWidth 1600)
     (.setMouseWheelEnabled true)))
 
 (defn- add-charts [frame datasets]
@@ -41,7 +42,7 @@
 (defn- frame [title & datasets]
   (doto (ApplicationFrame. title)
     (add-charts datasets)
-    (.pack)
+    (.setExtendedState JFrame/MAXIMIZED_BOTH)
     (.setVisible true)))
 
 (defn- ->Function2D [f]
