@@ -31,7 +31,7 @@
     (.pack)
     (.setVisible true)))
 
-(defn log-generation [dataset population generation]
+(defn- log-generation [dataset population generation]
   (.addValue dataset (stat/mean-fitness population) "Mean" generation)
   (.addValue dataset (stat/best-fitness population) "Best" generation)
   (Thread/sleep 200))
