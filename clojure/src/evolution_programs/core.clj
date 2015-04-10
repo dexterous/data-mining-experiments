@@ -13,8 +13,6 @@
   (fn [p g]
     (doseq [l loggers] (l p g))))
 
-(def max-generations 20)
-
 (defn preserving-fittest [f]
   (fn [& args]
     (let [population (last args)
@@ -28,14 +26,15 @@
   ([objective limits]
    (run objective limits (spread-logger (console/logger) (chart/logger))))
   ([objective limits logger]
-   (ga/run
-     objective
-     (preserving-fittest selection/binary-tournament-without-replacement)
-     (preserving-fittest (partial recombination/crossover-mutation
-                                  (partial crossover/simulated-binary-with-limits limits)
-                                  (partial mutation/parameter-based-with-limits limits max-generations)))
-     (ga/terminate-max-generations? max-generations)
-     (random-generators/generate-population 20 limits)
-     logger)))
+   (let [max-generations 50]
+     (ga/run
+       objective
+       (preserving-fittest selection/binary-tournament-without-replacement)
+       (preserving-fittest (partial recombination/crossover-mutation
+                                    (partial crossover/simulated-binary-with-limits limits)
+                                    (partial mutation/parameter-based-with-limits limits max-generations)))
+       (ga/terminate-max-generations? max-generations)
+       (random-generators/generate-population 30 limits)
+       logger))))
 
 (defn maximize [f & options] (apply run (cons (objective/maximize f) options)))
