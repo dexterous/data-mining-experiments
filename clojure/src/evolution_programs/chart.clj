@@ -5,7 +5,7 @@
            [org.jfree.data.category CategoryDataset DefaultCategoryDataset]
            [org.jfree.data.function Function2D]
            [org.jfree.data.general DatasetUtilities]
-           [org.jfree.data.xy XYDataset]
+           [org.jfree.data.xy XYDataset XYSeries XYSeriesCollection]
            [org.jfree.ui ApplicationFrame]))
 
 (ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
@@ -13,7 +13,13 @@
 (defmulti ^:private chart class)
 
 (defmethod chart XYDataset [dataset]
-  (ChartFactory/createXYLineChart "Curve of function" "X" "Y" dataset))
+  (doto (ChartFactory/createXYLineChart "Curve of function" "X" "Y" dataset)
+    (->
+      (.getXYPlot)
+      (.getRenderer)
+      (doto
+        (.setSeriesLinesVisible 0 false)
+        (.setSeriesShapesVisible 0 true)))))
 
 (defmethod chart CategoryDataset [dataset]
   (doto (ChartFactory/createLineChart "Population Analysis" "Generation" "Fitness" dataset)
@@ -42,13 +48,20 @@
   (reify Function2D (getValue [_ x] (f x))))
 
 (defn- sample [f min max samples]
-    (DatasetUtilities/sampleFunction2D (->Function2D f) min max samples "Value"))
+  (doto (XYSeriesCollection. (XYSeries. "Individual"))
+    (.addSeries (DatasetUtilities/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))))
 
-(defn- log-generation [analysis-dataset population generation-number]
+(defn- log-generation
+  ([analysis-dataset population generation-number]
    (doto analysis-dataset
      (.addValue (stat/mean-fitness population) "Mean" generation-number)
      (.addValue (stat/best-fitness population) "Best" generation-number))
    (Thread/sleep 500))
+  ([f generation-series analysis-dataset population generation-number]
+   (.clear generation-series)
+   (doseq [[individual] population]
+     (.add generation-series individual (f individual)))
+   (log-generation analysis-dataset population generation-number)))
 
 (defn logger
   ([]
@@ -57,6 +70,7 @@
      (partial log-generation analysis-dataset)))
   ([f min max samples]
    (let [sample-dataset (sample f min max samples)
+         generation-series (.getSeries sample-dataset "Individual")
          analysis-dataset (DefaultCategoryDataset.)]
      (frame  "Population Analysis" sample-dataset analysis-dataset)
-     (partial log-generation analysis-dataset))))
+     (partial log-generation f generation-series analysis-dataset))))
