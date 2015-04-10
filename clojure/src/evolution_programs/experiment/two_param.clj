@@ -1,5 +1,5 @@
-(ns evolution-programs.two-param
-  (:require [evolution-programs.core :as core])
+(ns evolution-programs.experiment.two-param
+  (:require [evolution-programs.util.ga :as ga])
   (:gen-class))
 
 (defn f [x y]
@@ -12,4 +12,4 @@
 (def limits [{:min -3.0 :max 12.1} {:min 4.1 :max 5.8}])
 
 (defn -main [& args]
-  (core/maximize f limits))
+  (ga/maximize f limits))

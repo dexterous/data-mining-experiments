@@ -1,5 +1,5 @@
-(ns evolution-programs.chart
-  (:require [evolution-programs.population-statistic :as stat])
+(ns evolution-programs.logging.chart
+  (:require [evolution-programs.util.population-statistic :as stat])
   (:import [javax.swing BoxLayout JFrame]
            [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
            [org.jfree.data.category CategoryDataset DefaultCategoryDataset]
