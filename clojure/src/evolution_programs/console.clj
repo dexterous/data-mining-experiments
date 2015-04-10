@@ -7,4 +7,3 @@
   (flush))
 
 (defn logger [] log-generation)
-
