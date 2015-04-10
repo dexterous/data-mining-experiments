@@ -1,6 +1,7 @@
 (ns evolution-programs.chart
   (:require [evolution-programs.population-statistic :as stat])
-  (:import [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
+  (:import [javax.swing BoxLayout]
+           [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
            [org.jfree.data.category CategoryDataset DefaultCategoryDataset]
            [org.jfree.data.function Function2D]
            [org.jfree.data.general DatasetUtilities]
@@ -25,23 +26,37 @@
   (doto (ChartPanel. chart)
     (.setMouseWheelEnabled true)))
 
-(defn frame [title dataset]
+(defn- add-charts [frame datasets]
+  (let [content-pane (.getContentPane frame)]
+    (.setLayout content-pane (BoxLayout. content-pane BoxLayout/Y_AXIS))
+    (doseq [dataset datasets]
+      (.add content-pane (panel (chart dataset))))))
+
+(defn- frame [title & datasets]
   (doto (ApplicationFrame. title)
-    (.setContentPane (panel (chart dataset)))
+    (add-charts datasets)
     (.pack)
     (.setVisible true)))
 
-(defn- log-generation [dataset population generation]
-  (.addValue dataset (stat/mean-fitness population) "Mean" generation)
-  (.addValue dataset (stat/best-fitness population) "Best" generation)
-  (Thread/sleep 200))
+(defn- ->Function2D [f]
+  (reify Function2D (getValue [_ x] (f x))))
 
-(defn logger []
-  (let [dataset (DefaultCategoryDataset.)]
-    (frame  "Population Analysis" dataset)
-    (partial log-generation dataset)))
+(defn- sample [f min max samples]
+    (DatasetUtilities/sampleFunction2D (->Function2D f) min max samples "Value"))
 
-(defn sample [f min max]
-  (DatasetUtilities/sampleFunction2D
-    (reify Function2D (getValue [this x] (f x)))
-    min max 1000 "Value"))
+(defn- log-generation [analysis-dataset population generation-number]
+   (doto analysis-dataset
+     (.addValue (stat/mean-fitness population) "Mean" generation-number)
+     (.addValue (stat/best-fitness population) "Best" generation-number))
+   (Thread/sleep 500))
+
+(defn logger
+  ([]
+   (let [analysis-dataset (DefaultCategoryDataset.)]
+     (frame "Popluation Analysis" analysis-dataset)
+     (partial log-generation analysis-dataset)))
+  ([f min max samples]
+   (let [sample-dataset (sample f min max samples)
+         analysis-dataset (DefaultCategoryDataset.)]
+     (frame  "Population Analysis" sample-dataset analysis-dataset)
+     (partial log-generation analysis-dataset))))

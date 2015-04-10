@@ -11,5 +11,4 @@
 (def limits [{:min -1 :max 2}])
 
 (defn -main [& args]
-  (chart/frame "Curve of function" (chart/sample f -1 2))
-  (core/maximize f limits))
+  (core/maximize f limits (chart/logger f -1 2 1000)))
