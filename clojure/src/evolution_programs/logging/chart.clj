@@ -70,7 +70,7 @@
 (defn logger
   ([]
    (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
-     (frame "Popluation Analysis" analysis-dataset)
+     (frame "Population Analysis" analysis-dataset)
      (partial log-generation analysis-dataset)))
   ([f min max samples]
    (let [sample-dataset (sample f min max samples)
