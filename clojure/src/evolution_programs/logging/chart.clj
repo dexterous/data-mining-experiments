@@ -7,18 +7,21 @@
            [org.jfree.data.xy XYSeries XYSeriesCollection]
            [org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset]))
 
+(def ^:private individual-series-key "Individual")
+
 (ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
 
 (defmulti ^:private chart class)
 
 (defmethod chart XYSeriesCollection [dataset]
-  (doto (ChartFactory/createXYLineChart "Curve of function" "X" "Y" dataset)
-    (->
-      (.getXYPlot)
-      (.getRenderer)
-      (doto
-        (.setSeriesLinesVisible 0 false)
-        (.setSeriesShapesVisible 0 true)))))
+  (let [individual-series (.getSeriesIndex dataset individual-series-key)]
+    (doto (ChartFactory/createXYLineChart "Curve of function" "X" "Y" dataset)
+      (->
+        (.getXYPlot)
+        (.getRenderer)
+        (doto
+          (.setSeriesLinesVisible individual-series false)
+          (.setSeriesShapesVisible individual-series true))))))
 
 (defmethod chart BoxAndWhiskerCategoryDataset [dataset]
   (ChartFactory/createBoxAndWhiskerChart "Population Analysis" "Generation" "Fitness" dataset false))
@@ -45,7 +48,7 @@
   (reify Function2D (getValue [_ x] (f x))))
 
 (defn- sample [f min max samples]
-  (doto (XYSeriesCollection. (XYSeries. "Individual"))
+  (doto (XYSeriesCollection. (XYSeries. individual-series-key))
     (.addSeries (DatasetUtilities/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))))
 
 (defn- set-individuals [series f population]
@@ -71,7 +74,7 @@
      (partial log-generation analysis-dataset)))
   ([f min max samples]
    (let [sample-dataset (sample f min max samples)
-         generation-series (.getSeries sample-dataset "Individual")
+         generation-series (.getSeries sample-dataset individual-series-key)
          analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
      (frame  "Population Analysis" sample-dataset analysis-dataset)
      (partial log-generation f generation-series analysis-dataset))))
