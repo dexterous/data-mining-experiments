@@ -5,8 +5,7 @@
            [org.jfree.data.category CategoryDataset DefaultCategoryDataset]
            [org.jfree.data.function Function2D]
            [org.jfree.data.general DatasetUtilities]
-           [org.jfree.data.xy XYDataset XYSeries XYSeriesCollection]
-           [org.jfree.ui ApplicationFrame]))
+           [org.jfree.data.xy XYDataset XYSeries XYSeriesCollection]))
 
 (ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
 
@@ -40,9 +39,10 @@
       (.add content-pane (panel (chart dataset))))))
 
 (defn- frame [title & datasets]
-  (doto (ApplicationFrame. title)
+  (doto (JFrame. title)
     (add-charts datasets)
     (.setExtendedState JFrame/MAXIMIZED_BOTH)
+    (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
     (.setVisible true)))
 
 (defn- ->Function2D [f]
