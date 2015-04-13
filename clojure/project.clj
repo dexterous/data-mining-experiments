@@ -6,5 +6,5 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [clj-genetic "0.3.0" :exclusions [org.clojure/clojure]]
                  [org.jfree/jfreechart "1.0.19"]]
-  :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :main ^:skip-aot clojure.main
+  :target-path "target/%s")

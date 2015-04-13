@@ -1,7 +1,6 @@
 (ns evolution-programs.experiment.one-param
   (:require [evolution-programs.util.ga :as ga]
-            [evolution-programs.logging.chart :as chart])
-  (:gen-class))
+            [evolution-programs.logging.chart :as chart]))
 
 (defn f [x]
   (+ (* x
