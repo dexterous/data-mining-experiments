@@ -67,14 +67,17 @@
      (.add (stat/fitness population) "Fitness" generation-number))
    (Thread/sleep 500)))
 
+(defn- terminator [frame]
+  (fn [_ _] (not (.isVisible frame))))
+
 (defn logger
   ([]
    (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
-     (frame "Population Analysis" analysis-dataset)
-     (partial log-generation analysis-dataset)))
+     [(terminator (frame "Population Analysis" analysis-dataset))
+      (partial log-generation analysis-dataset)]))
   ([f min max samples]
    (let [sample-dataset (sample f min max samples)
          generation-series (.getSeries sample-dataset individual-series-key)
          analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
-     (frame  "Population Analysis" sample-dataset analysis-dataset)
-     (partial log-generation f generation-series analysis-dataset))))
+     [(terminator (frame  "Population Analysis" sample-dataset analysis-dataset))
+      (partial log-generation f generation-series analysis-dataset)])))

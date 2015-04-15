@@ -24,8 +24,9 @@
 
 (defn run
   ([objective limits]
-   (run objective limits (spread-logger (console/logger) (chart/logger))))
-  ([objective limits logger]
+   (let [[frame-terminator chart-logger] (chart/logger)]
+     (run objective limits (spread-logger (console/logger) chart-logger) frame-terminator)))
+  ([objective limits logger terminator]
    (let [max-generations 50]
      (ga/run
        objective
@@ -33,7 +34,9 @@
        (preserving-fittest (partial recombination/crossover-mutation
                                     (partial crossover/simulated-binary-with-limits limits)
                                     (partial mutation/parameter-based-with-limits limits max-generations)))
-       (ga/terminate-max-generations? max-generations)
+       (fn [& arg] ((some-fn
+                      (partial apply terminator)
+                      (partial apply (ga/terminate-max-generations? max-generations))) arg))
        (random-generators/generate-population 30 limits)
        logger))))
 

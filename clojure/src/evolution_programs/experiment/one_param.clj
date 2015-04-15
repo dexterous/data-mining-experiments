@@ -10,4 +10,5 @@
 (def limits [{:min -1 :max 2}])
 
 (defn -main [& args]
-  (ga/maximize f limits (chart/logger f -1 2 1000)))
+  (let [[terminator logger] (chart/logger f -1 2 1000)]
+    (ga/maximize f limits logger terminator)))
