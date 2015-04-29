@@ -48,23 +48,20 @@
   (reify Function2D (getValue [_ x] (f x))))
 
 (defn- sample [f min max samples]
-  (doto (XYSeriesCollection. (XYSeries. individual-series-key))
-    (.addSeries (DatasetUtilities/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))))
+  (DatasetUtilities/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))
 
-(defn- set-individuals [series f population]
-  (doseq [[individual] population]
-    (.add series individual (f individual) false)))
+(defn- set-individuals [series population]
+  (.clear series)
+  (doseq [[x :as individual] population]
+    (.add series x (:fitness (meta individual)) false))
+  (.fireSeriesChanged series))
 
 (defn- log-generation
-  ([f generation-series analysis-dataset population generation-number]
-   (doto generation-series
-     (.clear)
-     (set-individuals f population)
-     (.fireSeriesChanged))
+  ([generation-series analysis-dataset population generation-number]
+   (set-individuals generation-series population)
    (log-generation analysis-dataset population generation-number))
   ([analysis-dataset population generation-number]
-   (doto analysis-dataset
-     (.add (stat/fitness population) "Fitness" generation-number))
+   (.add analysis-dataset (stat/fitness population) "Fitness" generation-number)
    (Thread/sleep 500)))
 
 (defn- terminator [frame]
@@ -76,8 +73,9 @@
      [(terminator (frame "Population Analysis" analysis-dataset))
       (partial log-generation analysis-dataset)]))
   ([f min max samples]
-   (let [sample-dataset (sample f min max samples)
-         generation-series (.getSeries sample-dataset individual-series-key)
-         analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
+   (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)
+         generation-series (XYSeries. individual-series-key)
+         sample-dataset (doto (XYSeriesCollection. generation-series)
+                          (.addSeries (sample f min max samples)))]
      [(terminator (frame  "Population Analysis" sample-dataset analysis-dataset))
-      (partial log-generation f generation-series analysis-dataset)])))
+      (partial log-generation generation-series analysis-dataset)])))
