@@ -7,4 +7,5 @@
                  [clj-genetic "0.3.0" :exclusions [org.clojure/clojure]]
                  [org.jfree/jfreechart "1.0.19"]]
   :main ^:skip-aot clojure.main
+  :source-paths ["src/main/clojure"]
   :target-path "target/%s")
