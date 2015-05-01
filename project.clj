@@ -8,4 +8,5 @@
                  [org.jfree/jfreechart "1.0.19"]]
   :main ^:skip-aot clojure.main
   :source-paths ["src/main/clojure"]
+  :java-source-paths ["src/main/java"]
   :target-path "target/%s")
