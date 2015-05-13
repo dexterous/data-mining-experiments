@@ -1,5 +1,5 @@
-(defproject evolution-programs "0.0.1"
-  :description "A bunch of EP experiments for my IS665 course at Pace University"
+(defproject data-mining-experiments "0.0.0"
+  :description "A bunch of data mining experiments for my IS665 course at Pace University"
   :url "http://pace.saagermhatre.in/is665/"
   :license {:name "MIT License"
             :url "http://opensource.org/licenses/MIT"}
