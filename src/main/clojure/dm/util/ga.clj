@@ -1,4 +1,4 @@
-(ns evolution-programs.util.ga
+(ns dm.util.ga
   (:require [clj-genetic.core :as ga]
             [clj-genetic.objective :as objective]
             [clj-genetic.selection :as selection]
@@ -6,8 +6,8 @@
             [clj-genetic.mutation :as mutation]
             [clj-genetic.crossover :as crossover]
             [clj-genetic.random-generators :as random-generators]
-            [evolution-programs.logging.console :as console]
-            [evolution-programs.logging.chart :as chart]))
+            [dm.viz.console :as console]
+            [dm.viz.chart :as chart]))
 
 (defn- spread-logger [& loggers]
   (fn [p g]

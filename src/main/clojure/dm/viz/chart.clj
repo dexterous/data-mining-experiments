@@ -1,5 +1,5 @@
-(ns evolution-programs.logging.chart
-  (:require [evolution-programs.util.population-statistic :as stat])
+(ns dm.viz.chart
+  (:require [dm.util.population-statistic :as stat])
   (:import [javax.swing BoxLayout JFrame]
            [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
            [org.jfree.data.function Function2D]

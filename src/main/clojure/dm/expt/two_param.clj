@@ -1,5 +1,5 @@
-(ns evolution-programs.experiment.two-param
-  (:require [evolution-programs.util.ga :as ga]))
+(ns dm.expt.two-param
+  (:require [dm.util.ga :as ga]))
 
 (defn f [x y]
   (+ 21.5

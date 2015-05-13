@@ -1,6 +1,6 @@
-(ns evolution-programs.experiment.one-param
-  (:require [evolution-programs.util.ga :as ga]
-            [evolution-programs.logging.chart :as chart]))
+(ns dm.expt.one-param
+  (:require [dm.util.ga :as ga]
+            [dm.viz.chart :as chart]))
 
 (defn f [x]
   (+ (* x

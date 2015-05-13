@@ -1,4 +1,4 @@
-(ns evolution-programs.util.population-statistic)
+(ns dm.util.population-statistic)
 
 (defn fitness [population] (map #(:fitness (meta %)) population))
 (defn best-fitness [population] (apply max (fitness population)))
