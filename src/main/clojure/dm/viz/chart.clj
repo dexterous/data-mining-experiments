@@ -1,6 +1,6 @@
 (ns dm.viz.chart
   (:require [dm.util.population-statistic :as stat])
-  (:import [javax.swing BoxLayout JFrame]
+  (:import [javax.swing BoxLayout JFrame SwingUtilities]
            [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]
            [org.jfree.data.function Function2D]
            [org.jfree.data.general DatasetUtilities]
@@ -38,11 +38,12 @@
       (.add content-pane (panel (chart dataset))))))
 
 (defn- frame [title & datasets]
-  (doto (JFrame. title)
-    (add-charts datasets)
-    (.setExtendedState JFrame/MAXIMIZED_BOTH)
-    (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
-    (.setVisible true)))
+  (letfn [(show-later [f] (SwingUtilities/invokeLater #(.setVisible f true)))]
+    (doto (JFrame. title)
+      (add-charts datasets)
+      (.setExtendedState JFrame/MAXIMIZED_BOTH)
+      (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
+      (show-later))))
 
 (defn- ->Function2D [f]
   (reify Function2D (getValue [_ x] (f x))))
