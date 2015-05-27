@@ -8,10 +8,16 @@
 (defprotocol FeatureExtractor
   (features [this subreddit-weight]))
 
+(defprotocol Affinity
+  (value [this]))
+
 (defrecord RedditAffinity [user subreddit value-str]
+  Affinity
+  (value [this] (Float/valueOf value-str))
+
   FeatureExtractor
-  (features [affinity subreddit-weight]
-    [(subreddit-weight subreddit) (Float/valueOf value-str)]))
+  (features [this subreddit-weight]
+    [(subreddit-weight subreddit) (value this)]))
 
 (defn -main
   ([]
@@ -32,7 +38,7 @@
          (map-indexed
            (fn [i a]
              [(str "Cluster" i)
-              (let [affs (map #(-> % :value-str Float/valueOf) a)]
+              (let [affs (map value a)]
                 (map #(% affs) [i/quantile i/mean i/median]))
               (select-keys subreddit->user-count (->> a (map :subreddit) set))])
            clusters))))))
