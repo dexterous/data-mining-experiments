@@ -6,7 +6,7 @@
             [clojure [pprint :as pp]]))
 
 (defprotocol FeatureExtractor
-  (features [this subreddit-weight]))
+  (features [this user-weight subreddit-weight]))
 
 (defprotocol Affinity
   (value [this]))
@@ -16,8 +16,8 @@
   (value [this] (Float/valueOf value-str))
 
   FeatureExtractor
-  (features [this subreddit-weight]
-    [(subreddit-weight subreddit) (value this)]))
+  (features [this user-weight subreddit-weight]
+    [#_(user-weight user) (subreddit-weight subreddit) (value this)]))
 
 (defn -main
   ([]
@@ -27,10 +27,9 @@
    (with-open [r (io/reader file)]
      (let [data (i/sample (next (data/read-csv r)) :size 10000 :replacement false)
            affinities (map (partial apply ->RedditAffinity) data)
-           subreddit->user-count (reduce-kv #(assoc %1 %2 (count (into #{} (map :user %3))))
-                                            {}
-                                            (group-by :subreddit affinities))
-           feature-extractor #(features % subreddit->user-count)
+           user->subreddit-count (frequencies (map :user affinities))
+           subreddit->user-count (frequencies (map :subreddit affinities))
+           feature-extractor #(features % user->subreddit-count subreddit->user-count)
            k 4
            max-iters 10
            clusters (cluster/k-means affinities i/euclidean-distance feature-extractor k max-iters)]
