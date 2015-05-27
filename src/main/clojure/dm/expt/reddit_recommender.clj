@@ -1,7 +1,7 @@
 (ns dm.expt.reddit-recommender
   (:require [clojure.data [csv :as data]]
             [clojure.java [io :as io]]
-            [kmeans-clj [core :as cluster]]
+            [kmeans-clj [core :as impl]]
             [incanter [stats :as i]]
             [clojure [pprint :as pp]]))
 
@@ -19,25 +19,38 @@
   (features [this user-weight subreddit-weight]
     [#_(user-weight user) (subreddit-weight subreddit) (value this)]))
 
+(defn analyze [cluster user-weight subreddit-weight]
+  {:count (count cluster)
+   :affinities (let [affs (map value cluster)]
+                 (map #(% affs) [i/quantile i/mean]))
+   :users (let [subsciptions (vals (select-keys user-weight (set (map :user cluster))))]
+            (map #(% subsciptions) [i/quantile count]))  
+   :subreddits (let [user-base (vals (select-keys subreddit-weight (set (map :subreddit cluster))))]
+                 (map #(% user-base) [i/quantile count]))})
+
+(defn clusters [affinities distance k max-iter]
+  (let [user->subreddits (frequencies (map :user affinities))
+        subreddit->users (frequencies (map :subreddit affinities))]
+    (->> (impl/k-means affinities distance #(features % user->subreddits subreddit->users) k max-iter)
+         (map-indexed
+           (fn [index cluster]
+             (merge
+               (analyze cluster user->subreddits subreddit->users)
+               {:name (format "Cluster %d" index)}))))))
+
+(defn ->affinities [rows]
+  (map (partial apply ->RedditAffinity) rows))
+
 (defn -main
   ([]
    (-main (io/resource "reddit/affinities.dump.csv")))
 
   ([file]
    (with-open [r (io/reader file)]
-     (let [data (i/sample (next (data/read-csv r)) :size 10000 :replacement false)
-           affinities (map (partial apply ->RedditAffinity) data)
-           user->subreddit-count (frequencies (map :user affinities))
-           subreddit->user-count (frequencies (map :subreddit affinities))
-           feature-extractor #(features % user->subreddit-count subreddit->user-count)
-           k 4
-           max-iters 10
-           clusters (cluster/k-means affinities i/euclidean-distance feature-extractor k max-iters)]
-       (pp/pprint
-         (map-indexed
-           (fn [i a]
-             [(str "Cluster" i)
-              (let [affs (map value a)]
-                (map #(% affs) [i/quantile i/mean i/median]))
-              (select-keys subreddit->user-count (->> a (map :subreddit) set))])
-           clusters))))))
+     (-> (data/read-csv r)
+         next ;ignore header row
+         (i/sample :replacement false :size 100)
+         ->affinities
+         (clusters i/euclidean-distance 10 100)
+         (doto
+           (pp/pprint))))))
