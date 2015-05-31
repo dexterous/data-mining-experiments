@@ -24,7 +24,7 @@
    :affinities (let [affs (map value cluster)]
                  (map #(% affs) [i/quantile i/mean]))
    :users (let [subsciptions (vals (select-keys user-weight (set (map :user cluster))))]
-            (map #(% subsciptions) [i/quantile count]))  
+            (map #(% subsciptions) [i/quantile count]))
    :subreddits (let [user-base (vals (select-keys subreddit-weight (set (map :subreddit cluster))))]
                  (map #(% user-base) [i/quantile count]))})
 
