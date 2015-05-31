@@ -11,7 +11,7 @@
 
 (ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
 
-(defmulti ^:private chart class)
+(defmulti chart class)
 
 (defmethod chart XYSeriesCollection [dataset]
   (let [individual-series (.getSeriesIndex dataset individual-series-key)]
@@ -37,7 +37,7 @@
     (doseq [dataset datasets]
       (.add content-pane (panel (chart dataset))))))
 
-(defn- frame [title & datasets]
+(defn frame [title & datasets]
   (letfn [(show-later [f] (SwingUtilities/invokeLater #(.setVisible f true)))]
     (doto (JFrame. title)
       (add-charts datasets)

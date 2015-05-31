@@ -3,7 +3,10 @@
             [clojure.java [io :as io]]
             [kmeans-clj [core :as impl]]
             [incanter [stats :as i]]
-            [clojure [pprint :as pp]]))
+            [clojure [pprint :as pp]]
+            [dm.viz [chart :as chart]])
+  (:import [org.jfree.chart ChartFactory]
+           [org.jfree.data.xy DefaultXYDataset XYDataset]))
 
 (defprotocol FeatureExtractor
   (features [this user-weight subreddit-weight]))
@@ -41,16 +44,30 @@
 (defn ->affinities [rows]
   (map (partial apply ->RedditAffinity) rows))
 
+(defn affinities->doubles [affinities]
+  (let [user->subreddits (frequencies (map :user affinities))
+        subreddit->users (frequencies (map :subreddit affinities))]
+    (into-array (apply map (comp double-array vector) (map #(features % user->subreddits subreddit->users) affinities)))))
+
+(defn plot [affinities]
+  (chart/frame "Affinity scatter" (doto (DefaultXYDataset.)
+                                    (.addSeries "Features" (affinities->doubles affinities)))))
+
+(defmethod chart/chart XYDataset [dataset]
+  (ChartFactory/createScatterPlot "Affinity scatter" "Subreddit weight" "Affinity" dataset))
+
 (defn -main
   ([]
-   (-main (io/resource "reddit/affinities.dump.csv")))
+   (-main (io/resource "reddit/affinities.dump.csv") 10))
 
-  ([file]
+  ([file sample-size]
    (with-open [r (io/reader file)]
      (-> (data/read-csv r)
          next ;ignore header row
-         (i/sample :replacement false :size 100)
+         (i/sample :replacement false :size sample-size)
          ->affinities
+         (doto
+           (plot))
          (clusters i/euclidean-distance 10 100)
          (doto
            (pp/pprint))))))
