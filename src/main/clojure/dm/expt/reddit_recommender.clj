@@ -23,11 +23,11 @@
     [#_(user-weight user) (subreddit-weight subreddit) (value this)]))
 
 (defn analyze [cluster user-weight subreddit-weight]
-  {:count (count cluster)
+  {:count      (count cluster)
    :affinities (let [affs (map value cluster)]
                  (map #(% affs) [i/quantile i/mean]))
-   :users (let [subsciptions (vals (select-keys user-weight (set (map :user cluster))))]
-            (map #(% subsciptions) [i/quantile count]))
+   :users      (let [subsciptions (vals (select-keys user-weight (set (map :user cluster))))]
+                 (map #(% subsciptions) [i/quantile count]))
    :subreddits (let [user-base (vals (select-keys subreddit-weight (set (map :subreddit cluster))))]
                  (map #(% user-base) [i/quantile count]))})
 
@@ -47,11 +47,16 @@
 (defn affinities->doubles [affinities]
   (let [user->subreddits (frequencies (map :user affinities))
         subreddit->users (frequencies (map :subreddit affinities))]
-    (into-array (apply map (comp double-array vector) (map #(features % user->subreddits subreddit->users) affinities)))))
+    (into-array
+      (apply map
+             (comp double-array vector)
+             (map #(features % user->subreddits subreddit->users) affinities)))))
 
 (defn plot [affinities]
-  (chart/frame "Affinity scatter" (doto (DefaultXYDataset.)
-                                    (.addSeries "Features" (affinities->doubles affinities)))))
+  (chart/frame
+    "Affinity scatter"
+    (doto (DefaultXYDataset.)
+      (.addSeries "Features" (affinities->doubles affinities)))))
 
 (defmethod chart/chart XYDataset [dataset]
   (ChartFactory/createScatterPlot "Affinity scatter" "Subreddit weight" "Affinity" dataset))
