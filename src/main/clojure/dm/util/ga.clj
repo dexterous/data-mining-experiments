@@ -6,8 +6,69 @@
             [clj-genetic.mutation :as mutation]
             [clj-genetic.crossover :as crossover]
             [clj-genetic.random-generators :as random-generators]
-            [dm.viz.console :as console]
-            [dm.viz.chart :as chart]))
+            [dm.viz.chart :as chart]
+            [dm.util.population-statistic :as stat])
+  (:import [org.jfree.data.xy XYSeriesCollection XYSeries]
+           [org.jfree.chart ChartFactory]
+           [org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset]
+           [org.jfree.data.function Function2D]
+           [org.jfree.data.general DatasetUtilities]))
+
+(defn- console-logger [population generation]
+  (printf "Generation: %3d | Mean fitness: %.6f | Best: %.6f %n"
+          generation (stat/mean-fitness population) (stat/best-fitness population))
+  (flush))
+
+(def ^:private individual-series-key "Individual")
+
+(defmethod chart/chart XYSeriesCollection [dataset]
+  (let [individual-series (.getSeriesIndex dataset individual-series-key)]
+    (doto (ChartFactory/createXYLineChart "Curve of function" "X" "Y" dataset)
+      (->
+        (.getXYPlot)
+        (.getRenderer)
+        (doto
+          (.setSeriesLinesVisible individual-series false)
+          (.setSeriesShapesVisible individual-series true))))))
+
+(defmethod chart/chart BoxAndWhiskerCategoryDataset [dataset]
+  (ChartFactory/createBoxAndWhiskerChart "Population Analysis" "Generation" "Fitness" dataset false))
+
+(defn- ->Function2D [f]
+  (reify Function2D (getValue [_ x] (f x))))
+
+(defn- sample [f min max samples]
+  (DatasetUtilities/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))
+
+(defn- set-individuals [series population]
+  (.clear series)
+  (doseq [[x :as individual] population]
+    (.add series x (:fitness (meta individual)) false))
+  (.fireSeriesChanged series))
+
+(defn- log-generation
+  ([generation-series analysis-dataset population generation-number]
+   (set-individuals generation-series population)
+   (log-generation analysis-dataset population generation-number))
+  ([analysis-dataset population generation-number]
+   (.add analysis-dataset (stat/fitness population) "Fitness" generation-number)
+   (Thread/sleep 500)))
+
+(defn- terminator [frame]
+  (fn [_ _] (not (.isVisible frame))))
+
+(defn make-chart-logger
+  ([]
+   (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
+     [(terminator (chart/frame "Population Analysis" analysis-dataset))
+      (partial log-generation analysis-dataset)]))
+  ([f min max samples]
+   (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)
+         generation-series (XYSeries. individual-series-key)
+         sample-dataset (doto (XYSeriesCollection. generation-series)
+                          (.addSeries (sample f min max samples)))]
+     [(terminator (chart/frame "Population Analysis" sample-dataset analysis-dataset))
+      (partial log-generation generation-series analysis-dataset)])))
 
 (defn- spread-logger [& loggers]
   (fn [p g]
@@ -24,8 +85,8 @@
 
 (defn run
   ([objective limits]
-   (let [[frame-terminator chart-logger] (chart/logger)]
-     (run objective limits (spread-logger (console/logger) chart-logger) frame-terminator)))
+   (let [[frame-visible? chart-logger] (make-chart-logger)]
+     (run objective limits (spread-logger console-logger chart-logger) frame-visible?)))
   ([objective limits logger terminator]
    (let [max-generations 50]
      (ga/run
