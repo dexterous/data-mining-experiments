@@ -6,18 +6,20 @@
             [clj-genetic.mutation :as mutation]
             [clj-genetic.crossover :as crossover]
             [clj-genetic.random-generators :as random-generators]
-            [dm.viz.chart :as chart]
-            [dm.util.population-statistic :as stat])
-  (:import [org.jfree.data.xy XYSeriesCollection XYSeries]
-           [org.jfree.chart ChartFactory]
-           [org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset]
+            [incanter.stats :as i]
+            [dm.viz.chart :as chart])
+  (:import [org.jfree.chart ChartFactory]
            [org.jfree.data.function Function2D]
-           [org.jfree.data.general DatasetUtilities]))
+           [org.jfree.data.general DatasetUtilities]
+           [org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset]
+           [org.jfree.data.xy XYSeriesCollection XYSeries]))
+
+(def ^:private individual-fitness (comp :fitness meta))
 
 (defn- console-logger [population generation]
-  (printf "Generation: %3d | Mean fitness: %.6f | Best: %.6f %n"
-          generation (stat/mean-fitness population) (stat/best-fitness population))
-  (flush))
+  (let [fitness (map individual-fitness population)]
+    (printf "Generation: %3d | Mean fitness: %.6f | Best: %.6f %n" generation (i/mean fitness) (apply max fitness))
+    (flush)))
 
 (def ^:private individual-series-key "Individual")
 
@@ -43,7 +45,7 @@
 (defn- set-individuals [series population]
   (.clear series)
   (doseq [[x :as individual] population]
-    (.add series x (:fitness (meta individual)) false))
+    (.add series x (individual-fitness individual) false))
   (.fireSeriesChanged series))
 
 (defn- log-generation
@@ -51,7 +53,7 @@
    (set-individuals generation-series population)
    (log-generation analysis-dataset population generation-number))
   ([analysis-dataset population generation-number]
-   (.add analysis-dataset (stat/fitness population) "Fitness" generation-number)
+   (.add analysis-dataset (map individual-fitness population) "Fitness" generation-number)
    (Thread/sleep 500)))
 
 (defn- terminator [frame]
@@ -77,7 +79,7 @@
 (defn- preserving-fittest [f]
   (fn [& args]
     (let [population (last args)
-          fittest (apply max-key #(:fitness (meta %)) population)
+          fittest (apply max-key individual-fitness population)
           new-pop (apply f args)]
       (if (.contains new-pop fittest)
         new-pop
