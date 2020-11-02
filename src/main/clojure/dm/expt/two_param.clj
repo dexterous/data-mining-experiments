@@ -1,5 +1,6 @@
 (ns dm.expt.two-param
-  (:require [dm.util.ga :as ga]))
+  (:require
+    [dm.util.ga :as ga]))
 
 (defn f [x y]
   (+ 21.5

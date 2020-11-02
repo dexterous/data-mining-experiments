@@ -1,12 +1,14 @@
 (ns dm.expt.reddit-recommender
-  (:require [clojure.data [csv :as data]]
-            [clojure.java [io :as io]]
-            [kmeans-clj [core :as impl]]
-            [incanter [stats :as i]]
-            [clojure [pprint :as pp]]
-            [dm.viz [chart :as chart]])
-  (:import [org.jfree.chart ChartFactory]
-           [org.jfree.data.xy DefaultXYDataset XYDataset]))
+  (:require
+    [clojure [pprint :as pp]]
+    [clojure.data [csv :as data]]
+    [clojure.java [io :as io]]
+    [dm.viz [chart :as chart]])
+    [incanter [stats :as i]]
+    [kmeans-clj [core :as impl]]
+  (:import
+    (org.jfree.chart ChartFactory)
+    (org.jfree.data.xy DefaultXYDataset XYDataset)))
 
 (defprotocol FeatureExtractor
   (features [this user-weight subreddit-weight]))

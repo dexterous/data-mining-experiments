@@ -1,6 +1,7 @@
 (ns dm.viz.chart
-  (:import [javax.swing BoxLayout JFrame SwingUtilities]
-           [org.jfree.chart ChartFactory ChartPanel StandardChartTheme]))
+  (:import
+    (javax.swing BoxLayout JFrame SwingUtilities)
+    (org.jfree.chart ChartFactory ChartPanel StandardChartTheme)))
 
 (ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
 

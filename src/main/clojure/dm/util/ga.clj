@@ -1,18 +1,20 @@
 (ns dm.util.ga
-  (:require [clj-genetic.core :as ga]
-            [clj-genetic.objective :as objective]
-            [clj-genetic.selection :as selection]
-            [clj-genetic.recombination :as recombination]
-            [clj-genetic.mutation :as mutation]
-            [clj-genetic.crossover :as crossover]
-            [clj-genetic.random-generators :as random-generators]
-            [incanter.stats :as i]
-            [dm.viz.chart :as chart])
-  (:import [org.jfree.chart ChartFactory]
-           [org.jfree.data.function Function2D]
-           [org.jfree.data.general DatasetUtils]
-           [org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset]
-           [org.jfree.data.xy XYSeriesCollection XYSeries]))
+  (:require
+    [clj-genetic.core :as ga]
+    [clj-genetic.crossover :as crossover]
+    [clj-genetic.mutation :as mutation]
+    [clj-genetic.objective :as objective]
+    [clj-genetic.random-generators :as random-generators]
+    [clj-genetic.recombination :as recombination]
+    [clj-genetic.selection :as selection]
+    [dm.viz.chart :as chart]
+    [incanter.stats :as i])
+  (:import
+    (org.jfree.chart ChartFactory)
+    (org.jfree.data.function Function2D)
+    (org.jfree.data.general DatasetUtils)
+    (org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset)
+    (org.jfree.data.xy XYSeriesCollection XYSeries)))
 
 (def ^:private individual-fitness (comp :fitness meta))
 

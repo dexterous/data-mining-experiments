@@ -1,5 +1,6 @@
 (ns dm.expt.one-param
-  (:require [dm.util.ga :as ga]))
+  (:require
+    [dm.util.ga :as ga]))
 
 (defn f [x]
   (+ (* x
