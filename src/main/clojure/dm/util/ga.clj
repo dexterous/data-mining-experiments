@@ -58,20 +58,20 @@
    (.add analysis-dataset (map individual-fitness population) "Fitness" generation-number)
    (Thread/sleep 500)))
 
-(defn- terminator [frame]
+(defn- frame-closed? [frame]
   (fn [_ _] (not (.isVisible frame))))
 
 (defn make-chart-logger
   ([]
    (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)]
-     [(terminator (chart/frame "Population Analysis" analysis-dataset))
+     [(frame-closed? (chart/frame "Population Analysis" analysis-dataset))
       (partial log-generation analysis-dataset)]))
   ([f min max samples]
    (let [analysis-dataset (DefaultBoxAndWhiskerCategoryDataset.)
          generation-series (XYSeries. individual-series-key)
          sample-dataset (doto (XYSeriesCollection. generation-series)
                           (.addSeries (sample f min max samples)))]
-     [(terminator (chart/frame "Population Analysis" sample-dataset analysis-dataset))
+     [(frame-closed? (chart/frame "Population Analysis" sample-dataset analysis-dataset))
       (partial log-generation generation-series analysis-dataset)])))
 
 (defn- spread-logger [& loggers]
@@ -89,8 +89,8 @@
 
 (defn run
   ([objective limits]
-   (let [[frame-visible? chart-logger] (make-chart-logger)]
-     (run objective limits (spread-logger console-logger chart-logger) frame-visible?)))
+   (let [[frame-closed? chart-logger] (make-chart-logger)]
+     (run objective limits (spread-logger console-logger chart-logger) frame-closed?)))
   ([objective limits logger terminator]
    (let [max-generations 50]
      (ga/run
