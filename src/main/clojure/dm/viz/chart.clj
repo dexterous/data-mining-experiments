@@ -4,7 +4,7 @@
     (org.jfree.chart ChartFactory ChartPanel StandardChartTheme)
     (org.jfree.chart.editor ChartEditorManager)))
 
-(ChartFactory/setChartTheme (StandardChartTheme. "JFree/Shadow" true))
+(ChartFactory/setChartTheme (StandardChartTheme/createJFreeTheme))
 
 (defmulti chart class)
 
