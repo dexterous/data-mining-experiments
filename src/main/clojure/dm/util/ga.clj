@@ -10,7 +10,7 @@
             [dm.viz.chart :as chart])
   (:import [org.jfree.chart ChartFactory]
            [org.jfree.data.function Function2D]
-           [org.jfree.data.general DatasetUtilities]
+           [org.jfree.data.general DatasetUtils]
            [org.jfree.data.statistics BoxAndWhiskerCategoryDataset DefaultBoxAndWhiskerCategoryDataset]
            [org.jfree.data.xy XYSeriesCollection XYSeries]))
 
@@ -40,7 +40,7 @@
   (reify Function2D (getValue [_ x] (f x))))
 
 (defn- sample [f min max samples]
-  (DatasetUtilities/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))
+  (DatasetUtils/sampleFunction2DToSeries (->Function2D f) min max samples "Value"))
 
 (defn- set-individuals [series population]
   (.clear series)
